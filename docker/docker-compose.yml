@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    image: php:8.1-apache
+    container_name: lamp-web
+    ports:
+      - "80:80"       # 외부에서 접근 가능 (클라우드 배포시 포트 개방 필요)
+    volumes:
+      - ./app:/var/www/html    # 호스트의 app 폴더에 프로젝트 파일 보관
+      - ./uploads:/var/www/html/uploads  # 파일 업로드 폴더 마운트
+    depends_on:
+      - db
+
+  db:
+    image: mysql:8.0
+    container_name: lamp-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: userpassword
+    ports:
+      - "3300:3300"   # 로컬 개발 시 DB 접속 확인용 (클라우드에서는 보안상 외부 노출 X)
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql
+volumes:
+  db_data:
+
